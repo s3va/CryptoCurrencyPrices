@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <data>
+
+        <variable
+            name="crPair"
+            type="tk.kvakva.cryptocurrencyprices.CryptoPrices" />
+        <variable
+            name="recyviewLsnr"
+            type="tk.kvakva.cryptocurrencyprices.RecyViewListener" />
+    </data>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/pairName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:onClick="@{(view) -> recyviewLsnr.onClick(view,crPair)}"
+            android:text="@{crPair.pairs}" />
+      <!--  <TextView
+            android:id="@+id/pairFee"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@{String.valueOf(crPair.fee)}" />
+        <TextView
+            android:id="@+id/pairMax"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@{String.valueOf(crPair.max_price)}" />
+
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:layout_marginStart="4dp"
+            android:background="@android:color/darker_gray" />
+        <TextView
+            android:id="@+id/pair"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@{crPair.toString()}" />
+
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:layout_marginStart="4dp"
+            android:background="@android:color/darker_gray" />-->
+
+    </LinearLayout>
+</layout>

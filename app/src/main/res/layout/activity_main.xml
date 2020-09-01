@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="mainActViewModel"
+            type="tk.kvakva.cryptocurrencyprices.MainActivityViewModel" />
+    </data>
+
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/swipeToRefresh"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context=".MainActivity">
+
+ <!--       <androidx.appcompat.widget.LinearLayoutCompat
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/pair"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="btc usd"
+                />
+
+            <TextView
+                android:id="@+id/hiPrice"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@{mainActViewModel.yoHi}"/>
+
+            <TextView
+                android:id="@+id/loPrice"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@{mainActViewModel.yoLo}"/>
+
+            <TextView
+                android:id="@+id/laPrice"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@{mainActViewModel.yoLa}"/>
+
+        </androidx.appcompat.widget.LinearLayoutCompat>-->
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerViewCryptoList"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+</layout>
