@@ -6,7 +6,9 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
+import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import kotlinx.android.synthetic.main.activity_main.*
@@ -15,15 +17,23 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.logging.HttpLoggingInterceptor
 import org.json.JSONObject
+import tk.kvakva.cryptocurrencyprices.databinding.ActivityMainBinding
 import java.net.SocketException
 import java.util.concurrent.TimeUnit
 
 private const val TAG = "MY_MainActivity"
 
 class MainActivity : AppCompatActivity() {
+
+    private lateinit var binding: ActivityMainBinding
+    private val viewModel by viewModels<MainActivityViewModel>()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        //setContentView(R.layout.activity_main)
+        binding=DataBindingUtil.setContentView(this,R.layout.activity_main)
+        binding.mainActViewModel=viewModel
+        binding.lifecycleOwner=this
 
         val recViAd = AdapterCrypto(RecyViewListener { v: View, cP: CryptoPrices ->
             lifecycleScope.launch(Dispatchers.IO) {
@@ -77,14 +87,12 @@ class MainActivity : AppCompatActivity() {
         })
 
         //recyclerViewCryptoList.layoutManager=LinearLayoutManager(this, LinearLayoutManager.VERTICAL,false)
-
-
-        recyclerViewCryptoList.layoutManager=GridLayoutManager(this,if(resources.configuration.orientation==Configuration.ORIENTATION_PORTRAIT) 4 else 6)
-        recyclerViewCryptoList.adapter = recViAd
+        //recyclerViewCryptoList.layoutManager=GridLayoutManager(this,if(resources.configuration.orientation==Configuration.ORIENTATION_PORTRAIT) 4 else 6)
+        //recyclerViewCryptoList.adapter = recViAd
 
         swipeToRefresh.setOnRefreshListener {
             lifecycleScope.launch(Dispatchers.IO) {
-                try {
+/*                try {
                     val client = OkHttpClient.Builder()
                         .connectTimeout(5, TimeUnit.SECONDS)
                         .writeTimeout(5, TimeUnit.SECONDS)
@@ -136,8 +144,9 @@ class MainActivity : AppCompatActivity() {
                     e.printStackTrace()
                 } catch (e: Exception) {
                     e.printStackTrace()
-                }
+                }*/
                 //delay(5000);
+                viewModel._fetchYo()
                 swipeToRefresh.isRefreshing = false;
             }
         }

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
@@ -15,40 +16,115 @@
         android:layout_height="match_parent"
         tools:context=".MainActivity">
 
- <!--       <androidx.appcompat.widget.LinearLayoutCompat
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/linearLayoutCompat"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
 
             <TextView
                 android:id="@+id/pair"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="btc usd"
-                />
+                android:text="YiBit.io btc usd"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
                 android:id="@+id/hiPrice"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@{mainActViewModel.yoHi}"/>
+                android:text="@{mainActViewModel.yoHi}"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/pair"
+                tools:text="hiPrice" />
 
             <TextView
                 android:id="@+id/loPrice"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@{mainActViewModel.yoLo}"/>
+                android:text="@{mainActViewModel.yoLo}"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/hiPrice"
+                tools:text="loPrice" />
 
             <TextView
                 android:id="@+id/laPrice"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@{mainActViewModel.yoLa}"/>
+                android:text="@{mainActViewModel.yoLa}"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/loPrice"
+                tools:text="laPrice" />
 
-        </androidx.appcompat.widget.LinearLayoutCompat>-->
+            <TextView
+                android:id="@+id/timeUpd"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@{mainActViewModel.yoTimeUpdated}"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/laPrice"
+                tools:text="timeUpd" />
 
-            <androidx.recyclerview.widget.RecyclerView
+            <TextView
+                android:id="@+id/timeServer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@{mainActViewModel.yoServerTime}"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/timeUpd"
+                tools:text="timeServer" />
+
+            <View
+                android:id="@+id/view2"
+                android:layout_width="0dp"
+                android:layout_height="2dp"
+                android:background="@color/colorAccent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/timeServer" />
+
+
+            <TextView
+                android:id="@+id/textView2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Poloniex.com USDT_BTC"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/view2" />
+
+            <TextView
+                android:id="@+id/poHiPrice"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@{mainActViewModel.poHi}"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textView2"
+                tools:text="poHiPrice" />
+
+            <TextView
+                android:id="@+id/poLoPrice"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@{mainActViewModel.poLo}"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/poHiPrice"
+                tools:text="poLoPrice" />
+
+            <TextView
+                android:id="@+id/poLaPrice"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@{mainActViewModel.poLa}"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/poLoPrice"
+                tools:text="poLaPrice" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+<!--            <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recyclerViewCryptoList"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent" />
+                android:layout_height="match_parent" />-->
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 </layout>
