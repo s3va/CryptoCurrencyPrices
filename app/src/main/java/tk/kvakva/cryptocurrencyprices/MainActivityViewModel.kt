@@ -57,6 +57,24 @@ class MainActivityViewModel(val appl: Application) : AndroidViewModel(appl) {
     val yoServerTime: LiveData<String>
         get() = _yoServerTime
 
+
+    private val _biHi = MutableLiveData<String>("-1")
+    val biHi: LiveData<String>
+        get() = _biHi
+
+    private val _biLo = MutableLiveData<String>("-1")
+    val biLo: LiveData<String>
+        get() = _biLo
+
+    private val _biLa = MutableLiveData<String>("-1")
+    val biLa: LiveData<String>
+        get() = _biLa
+
+    private val _biTimeStamp = MutableLiveData<String>("1969 may")
+    val biTimeStamp: LiveData<String>
+        get() = _biTimeStamp
+
+
     suspend fun _fetchYo() {
         try {
             val client = OkHttpClient.Builder()
@@ -127,6 +145,26 @@ class MainActivityViewModel(val appl: Application) : AndroidViewModel(appl) {
             _poHi.postValue("hi: " + jsonTecker.getDouble("high24hr").toString())
             _poLo.postValue("lo: " + jsonTecker.getDouble("low24hr").toString())
             _poLa.postValue("la: " + jsonTecker.getDouble("last").toString())
+
+
+            request = Request.Builder()
+                .url("https://api.bittrex.com/api/v1.1/public/getmarketsummary?market=usd-btc")
+                .build()
+            response = client.newCall(request).execute()
+            _respBodyString = response.body?.string() ?: ""
+            jsonObj = JSONObject(_respBodyString) //.toString(8)
+            if(jsonObj.getBoolean("success")){
+                val a=jsonObj.optJSONArray("result")
+                if (a != null && a.length()>0) {
+                    val o=a.getJSONObject(0)
+                    _biHi.postValue("hi: " + o.getDouble("High"))
+                    _biLo.postValue("lo: " + o.getDouble("Low"))
+                    _biLa.postValue("la: " + o.getDouble("Last"))
+                    _biTimeStamp.postValue("ti: " + o.getString("TimeStamp"))
+                }
+            }
+
+            response.close()
 
         } catch (e: Exception) {
             e.printStackTrace()

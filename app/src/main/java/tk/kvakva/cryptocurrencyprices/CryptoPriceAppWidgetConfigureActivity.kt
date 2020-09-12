@@ -1,26 +1,30 @@
 package tk.kvakva.cryptocurrencyprices
 
-import android.app.Activity
+//import android.app.Activity
 import android.appwidget.AppWidgetManager
 import android.content.Context
+
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.View
-import android.widget.EditText
+import androidx.appcompat.app.AppCompatActivity
+import kotlinx.android.synthetic.main.crypto_price_app_widget_configure.*
 
 /**
  * The configuration screen for the [CryptoPriceAppWidget] AppWidget.
  */
-class CryptoPriceAppWidgetConfigureActivity : Activity() {
+class CryptoPriceAppWidgetConfigureActivity : AppCompatActivity() {
     private var appWidgetId = AppWidgetManager.INVALID_APPWIDGET_ID
-    private lateinit var appWidgetText: EditText
+    //private lateinit var appWidgetText: EditText
     private var onClickListener = View.OnClickListener {
         //val context = this@NewAppWidgetConfigureActivity
         val context = this@CryptoPriceAppWidgetConfigureActivity
 
         // When the button is clicked, store the string locally
-        val widgetText = appWidgetText.text.toString()
-        saveTitlePref(context, appWidgetId, widgetText)
+        val widgetText = appwidget_ctext.text.toString()
+        val twidgetText = textLayoytInterval.text.toString().toLongOrNull()?:0
+        saveTitlePref(context, appWidgetId, widgetText, twidgetText)
 
         // It is the responsibility of the configuration activity to update the app widget
         val appWidgetManager = AppWidgetManager.getInstance(context)
@@ -41,7 +45,7 @@ class CryptoPriceAppWidgetConfigureActivity : Activity() {
         setResult(RESULT_CANCELED)
 
         setContentView(R.layout.crypto_price_app_widget_configure)
-        appWidgetText = findViewById<View>(R.id.appwidget_text) as EditText
+        //appWidgetText = findViewById<View>(R.id.appwidget_text) as EditText
         findViewById<View>(R.id.add_button).setOnClickListener(onClickListener)
 
         // Find the widget id from the intent.
@@ -59,23 +63,31 @@ class CryptoPriceAppWidgetConfigureActivity : Activity() {
             return
         }
 
-        appWidgetText.setText(
+        appwidget_ctext.setText(
             loadTitlePref(
                 this@CryptoPriceAppWidgetConfigureActivity,
                 appWidgetId
             )
         )
+
+        textLayoytInterval.setText(loadUPdateIntervalPref(
+            this@CryptoPriceAppWidgetConfigureActivity,
+            appWidgetId).toString()
+        )
+        
     }
 
 }
 
 private const val PREFS_NAME = "tk.kvakva.cryptocurrencyprices.CryptoPriceAppWidget"
 private const val PREF_PREFIX_KEY = "appwidget_"
+private const val PREF_PREFIX_TKEY = "tappwidget_"
 
 // Write the prefix to the SharedPreferences object for this widget
-internal fun saveTitlePref(context: Context, appWidgetId: Int, text: String) {
+internal fun saveTitlePref(context: Context, appWidgetId: Int, text: String, updTimeInterv: Long) {
     val prefs = context.getSharedPreferences(PREFS_NAME, 0).edit()
     prefs.putString(PREF_PREFIX_KEY + appWidgetId, text)
+    prefs.putLong(PREF_PREFIX_TKEY + appWidgetId, updTimeInterv)
     prefs.apply()
 }
 
@@ -83,12 +95,22 @@ internal fun saveTitlePref(context: Context, appWidgetId: Int, text: String) {
 // If there is no preference saved, get the default from a resource
 internal fun loadTitlePref(context: Context, appWidgetId: Int): String {
     val prefs = context.getSharedPreferences(PREFS_NAME, 0)
-    val titleValue = prefs.getString(PREF_PREFIX_KEY + appWidgetId, null)
-    return titleValue ?: context.getString(R.string.appwidget_text)
+    val titleValue = prefs.getString(PREF_PREFIX_KEY + appWidgetId, "YoBit.NET & PoLoniex.COM")
+    //return titleValue ?: context.getString(R.string.appwidget_text)
+    return titleValue ?: "YoBit.NET & PoLoniex.COM"
+}
+
+internal fun loadUPdateIntervalPref(context: Context, appWidgetId: Int): Long {
+    val prefs = context.getSharedPreferences(PREFS_NAME, 0)
+    val timeValue = prefs.getLong(PREF_PREFIX_TKEY + appWidgetId, 0)
+    Log.d("WIDPREFLOad", "loadUPdateIntervalPref: $timeValue")
+    //return titleValue ?: context.getString(R.string.appwidget_text)
+    return timeValue
 }
 
 internal fun deleteTitlePref(context: Context, appWidgetId: Int) {
     val prefs = context.getSharedPreferences(PREFS_NAME, 0).edit()
     prefs.remove(PREF_PREFIX_KEY + appWidgetId)
+    prefs.remove(PREF_PREFIX_TKEY + appWidgetId)
     prefs.apply()
 }
