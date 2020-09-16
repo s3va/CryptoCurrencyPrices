@@ -12,7 +12,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import okhttp3.logging.HttpLoggingInterceptor
 import org.json.JSONObject
 import java.time.Instant
 import java.time.LocalDateTime
@@ -82,16 +81,16 @@ class MainActivityViewModel(val appl: Application) : AndroidViewModel(appl) {
                 .writeTimeout(5, TimeUnit.SECONDS)
                 .readTimeout(5, TimeUnit.SECONDS)
                 .callTimeout(10, TimeUnit.SECONDS)
-                .addInterceptor(
-                    HttpLoggingInterceptor().apply {
-                        level = HttpLoggingInterceptor.Level.BODY
-                    }
-                )
+//                .addInterceptor(
+//                    HttpLoggingInterceptor().apply {
+//                        level = HttpLoggingInterceptor.Level.BODY
+//                    }
+//                )
                 .build()
             var request = Request.Builder()
                 .url("https://yobit.net/api/2/btc_usd/ticker")
                 .build()
-            var response = client.newCall(request).execute()
+            var response =  client.newCall(request).execute()
             var _respBodyString = response.body?.string() ?: ""
             Log.d(TAG, "onCreate: JSONObject:\n$_respBodyString")
             var jsonObj = JSONObject(_respBodyString) //.toString(8)

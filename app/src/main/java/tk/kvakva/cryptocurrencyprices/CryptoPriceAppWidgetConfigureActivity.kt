@@ -1,7 +1,10 @@
 package tk.kvakva.cryptocurrencyprices
 
 //import android.app.Activity
+import android.app.job.JobInfo
+import android.app.job.JobScheduler
 import android.appwidget.AppWidgetManager
+import android.content.ComponentName
 import android.content.Context
 
 import android.content.Intent
@@ -9,8 +12,11 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.os.bundleOf
+import androidx.core.os.persistableBundleOf
 import kotlinx.android.synthetic.main.crypto_price_app_widget_configure.*
 
+private const val TAG = "WidgetConfigureActivity"
 /**
  * The configuration screen for the [CryptoPriceAppWidget] AppWidget.
  */
@@ -29,6 +35,26 @@ class CryptoPriceAppWidgetConfigureActivity : AppCompatActivity() {
         // It is the responsibility of the configuration activity to update the app widget
         val appWidgetManager = AppWidgetManager.getInstance(context)
         updateAppWidget(context, appWidgetManager, appWidgetId)
+
+        Log.i(TAG, "OnClickListener: ************************ .setPeriodic($twidgetText * 1000)")
+                    val jobInfo = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                JobInfo.Builder(0,ComponentName(context.applicationContext,
+                    CryptoPriceAppWidget.UUUpdateService::class.java))
+                    .setRequiredNetworkType(JobInfo.NETWORK_TYPE_UNMETERED)
+                    .setPeriodic(twidgetText * 1000)
+                    .setTransientExtras(bundleOf(INT_WIDGET_KEY to appWidgetId))
+                    .setExtras(persistableBundleOf(INT_WIDGET_KEY to appWidgetId))
+            } else {
+                JobInfo.Builder(0, ComponentName(context.applicationContext,
+                    CryptoPriceAppWidget.UUUpdateService::class.java)
+                )
+                    .setRequiredNetworkType(JobInfo.NETWORK_TYPE_UNMETERED)
+                    .setExtras(persistableBundleOf(INT_WIDGET_KEY to appWidgetId))
+            }
+            //.setOverrideDeadline(20000)
+                //.setMinimumLatency(2000)
+
+            (context.getSystemService(Context.JOB_SCHEDULER_SERVICE) as JobScheduler).schedule(jobInfo.build())
 
         // Make sure we pass back the original appWidgetId
         val resultValue = Intent()

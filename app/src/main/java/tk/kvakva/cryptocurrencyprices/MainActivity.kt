@@ -1,6 +1,7 @@
 package tk.kvakva.cryptocurrencyprices
 
 
+import android.content.Intent
 import android.content.res.Configuration
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -10,15 +11,12 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.lifecycleScope
-import androidx.recyclerview.widget.GridLayoutManager
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.*
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import okhttp3.logging.HttpLoggingInterceptor
 import org.json.JSONObject
 import tk.kvakva.cryptocurrencyprices.databinding.ActivityMainBinding
-import java.net.SocketException
 import java.util.concurrent.TimeUnit
 
 private const val TAG = "MY_MainActivity"
@@ -43,11 +41,11 @@ class MainActivity : AppCompatActivity() {
                         .writeTimeout(5, TimeUnit.SECONDS)
                         .readTimeout(5, TimeUnit.SECONDS)
                         .callTimeout(10, TimeUnit.SECONDS)
-                        .addInterceptor(
-                            HttpLoggingInterceptor().apply {
-                                level = HttpLoggingInterceptor.Level.BODY
-                            }
-                        )
+//                        .addInterceptor(
+//                            HttpLoggingInterceptor().apply {
+//                                level = HttpLoggingInterceptor.Level.BODY
+//                            }
+//                        )
                         .build()
                     val request = Request.Builder()
                         .url("https://yobit.net/api/2/${cP.pairs}/ticker")
@@ -85,6 +83,10 @@ class MainActivity : AppCompatActivity() {
             }
 
         })
+
+        button.setOnClickListener {
+            startService(Intent(this,CryptoPriceAppWidget.UUUpdateService::class.java))
+        }
 
         //recyclerViewCryptoList.layoutManager=LinearLayoutManager(this, LinearLayoutManager.VERTICAL,false)
         //recyclerViewCryptoList.layoutManager=GridLayoutManager(this,if(resources.configuration.orientation==Configuration.ORIENTATION_PORTRAIT) 4 else 6)
@@ -146,12 +148,9 @@ class MainActivity : AppCompatActivity() {
                     e.printStackTrace()
                 }*/
                 //delay(5000);
-                viewModel._fetchYo()
+                ////////////////viewModel._fetchYo()
                 swipeToRefresh.isRefreshing = false;
             }
         }
-
-
-
     }
 }

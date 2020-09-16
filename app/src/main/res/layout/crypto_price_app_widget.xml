@@ -6,11 +6,38 @@
     android:padding="@dimen/widget_margin">
 
     <TextView
+        android:id="@+id/textWidTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="textWidTitle"
+        android:textColor="#fff" />
+
+    <TextView
+        android:id="@+id/textWidTitleId"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="4dp"
+        android:layout_toEndOf="@+id/textWidTitle"
+        android:background="@color/colorPrimaryDark"
+        android:paddingStart="16dp"
+        android:text="001"
+        android:textColor="#fff" />
+
+    <TextView
+        android:id="@+id/textViewId"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_toEndOf="@+id/textWidTitleId"
+        android:background="#fff"
+        android:text="TextViewId" />
+
+    <TextView
         android:id="@+id/appwidget_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:contentDescription="@string/appwidget_text"
-        android:text="btc"
+        android:layout_below="@+id/textWidTitle"
+        android:text="time date"
         android:textColor="#ffffff" />
 
     <TextView
@@ -18,7 +45,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/appwidget_text"
-        android:contentDescription="@string/appwidget_text"
         android:text="btc_price"
         android:textColor="#ffffff" />
 
