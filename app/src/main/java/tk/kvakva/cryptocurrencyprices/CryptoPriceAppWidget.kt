@@ -84,6 +84,7 @@ class CryptoPriceAppWidget : AppWidgetProvider() {
 
 
 
+
         /**
          * Called to indicate that the job has begun executing.  Override this method with the
          * logic for your job.  Like all other component lifecycle callbacks, this method executes
@@ -250,7 +251,7 @@ class CryptoPriceAppWidget : AppWidgetProvider() {
 
 
     override fun onReceive(context: Context?, intent: Intent?) {
-        Log.d(TAG, "onReceive: intent.extras --> ${intent?.extras}")
+        Log.d(TAG, "onReceive: intent.extras --> ${intent?.extras}\nvvvvvvvvvvvvvvvvvvvv intent action --> ${intent?.action}")
         super.onReceive(context, intent)
 
         Log.i(TAG, "onReceive: ${intent?.data}")

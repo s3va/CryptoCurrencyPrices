@@ -38,7 +38,7 @@ class CryptoPriceAppWidgetConfigureActivity : AppCompatActivity() {
 
         Log.i(TAG, "OnClickListener: ************************ .setPeriodic($twidgetText * 1000)")
                     val jobInfo = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-                JobInfo.Builder(0,ComponentName(context.applicationContext,
+                JobInfo.Builder(appWidgetId,ComponentName(context.applicationContext,
                     CryptoPriceAppWidget.UUUpdateService::class.java))
                     .setRequiredNetworkType(JobInfo.NETWORK_TYPE_UNMETERED)
                     .setPeriodic(twidgetText * 1000)
