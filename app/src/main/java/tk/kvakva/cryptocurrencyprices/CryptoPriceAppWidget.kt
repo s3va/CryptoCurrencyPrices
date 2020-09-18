@@ -6,7 +6,6 @@ import android.app.job.JobParameters
 import android.app.job.JobScheduler
 import android.app.job.JobService
 import android.appwidget.AppWidgetManager
-import android.appwidget.AppWidgetManager.*
 import android.appwidget.AppWidgetProvider
 import android.content.ComponentName
 import android.content.Context
@@ -14,7 +13,6 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.widget.RemoteViews
-import androidx.core.os.bundleOf
 import androidx.core.os.persistableBundleOf
 import kotlinx.coroutines.*
 import okhttp3.OkHttpClient
@@ -42,48 +40,6 @@ class CryptoPriceAppWidget : AppWidgetProvider() {
         private lateinit var yoServerTime: String
         private lateinit var yoCu: String
         private lateinit var poCu: String
-
-        /**
-         * Called by the system every time a client explicitly starts the service by calling
-         * [android.content.Context.startService], providing the arguments it supplied and a
-         * unique integer token representing the start request.  Do not call this method directly.
-         *
-         *
-         * For backwards compatibility, the default implementation calls
-         * [.onStart] and returns either [.START_STICKY]
-         * or [.START_STICKY_COMPATIBILITY].
-         *
-         *
-         * Note that the system calls this on your
-         * service's main thread.  A service's main thread is the same
-         * thread where UI operations take place for Activities running in the
-         * same process.  You should always avoid stalling the main
-         * thread's event loop.  When doing long-running operations,
-         * network calls, or heavy disk I/O, you should kick off a new
-         * thread, or use [android.os.AsyncTask].
-         *
-         * @param intent The Intent supplied to [android.content.Context.startService],
-         * as given.  This may be null if the service is being restarted after
-         * its process has gone away, and it had previously returned anything
-         * except [.START_STICKY_COMPATIBILITY].
-         * @param flags Additional data about this start request.
-         * @param startId A unique integer representing this specific request to
-         * start.  Use with [.stopSelfResult].
-         *
-         * @return The return value indicates what semantics the system should
-         * use for the service's current started state.  It may be one of the
-         * constants associated with the [.START_CONTINUATION_MASK] bits.
-         *
-         * @see .stopSelfResult
-         */
-//        override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-//
-//
-//            return super.onStartCommand(intent, flags, startId)
-//        }
-
-
-
 
         /**
          * Called to indicate that the job has begun executing.  Override this method with the
@@ -117,12 +73,10 @@ class CryptoPriceAppWidget : AppWidgetProvider() {
          * extras configured with [     This object serves to identify this specific running job instance when calling][JobInfo.Builder.setExtras]
          */
         override fun onStartJob(params: JobParameters?): Boolean {
-            val widgetId = params?.extras?.getInt(INT_WIDGET_KEY)?:0
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-                Log.i(_TAG, "onStartJob: params= ${params?.extras.toString()} ${params?.transientExtras.toString()}")
-            } else {
-                Log.i(_TAG, "onStartJob: params= ${params?.extras.toString()}")
-            }
+            //val widgetId = params?.extras?.getInt(INT_WIDGET_KEY)?:0
+            val widgetIds = params?.extras?.getIntArray(AppWidgetManager.EXTRA_APPWIDGET_IDS)
+            Log.i(_TAG, "onStartJob: 2222222222222222222 widgetIds= ${widgetIds?.toList()}")
+
             val views = RemoteViews(packageName, R.layout.crypto_price_app_widget)
             CoroutineScope(Dispatchers.Default).launch {
 
@@ -182,38 +136,45 @@ class CryptoPriceAppWidget : AppWidgetProvider() {
 //                    PendingIntent.getActivity(this, 0, _intent, 0)
 //                }
 //            views.setOnClickPendingIntent(R.id.app_widget, pendingIntent)
-                val pi: PendingIntent = Intent(
-                    this@UUUpdateService.applicationContext,
-                    CryptoPriceAppWidget::class.java
-                )
-                    .let { _intent: Intent ->
-                        _intent.action = ACTION_SIMPLEAPPWIDGET
-                        _intent.putExtra(INT_WIDGET_KEY,widgetId)
-                        //_intent.setData(Uri.parse("https://www.ru/" + UUID.randomUUID()))
-                        PendingIntent.getBroadcast(
-                            this@UUUpdateService,
-                            widgetId,
-                            _intent,
-                            PendingIntent.FLAG_UPDATE_CURRENT
+                widgetIds?.forEach { widgetId: Int ->
+                    val pi: PendingIntent = Intent(
+                        this@UUUpdateService.applicationContext,
+                        CryptoPriceAppWidget::class.java
+                    )
+                        .let { _intent: Intent ->
+                            //_intent.action = ACTION_SIMPLEAPPWIDGET
+                            _intent.action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
+//                        _intent.putExtra(INT_WIDGET_KEY,widgetId)
+                            _intent.putExtra(
+                                AppWidgetManager.EXTRA_APPWIDGET_IDS,
+                                intArrayOf(widgetId)
+                            )
+                            PendingIntent.getBroadcast(
+                                this@UUUpdateService,
+                                widgetId,
+                                _intent,
+                                PendingIntent.FLAG_UPDATE_CURRENT
+                            )
+                        }
+                    views.setOnClickPendingIntent(R.id.refresh_bt, pi)
+                    views.setTextViewText(R.id.appwidget_text, yoServerTime)
+                    views.setTextViewText(R.id.btc_price, yoCu)
+                    views.setTextViewText(R.id.poPrice, poCu)
+
+                    if (widgetId == 0)
+                        AppWidgetManager.getInstance(this@UUUpdateService).updateAppWidget(
+                            ComponentName(this@UUUpdateService, CryptoPriceAppWidget::class.java),
+                            views
+                        )
+                    else {
+                        views.setTextViewText(R.id.textViewId, "$widgetId")
+                        AppWidgetManager.getInstance(this@UUUpdateService).updateAppWidget(
+                            widgetId, views
                         )
                     }
-                views.setOnClickPendingIntent(R.id.refresh_bt, pi)
-                views.setTextViewText(R.id.appwidget_text, yoServerTime)
-                views.setTextViewText(R.id.btc_price, yoCu)
-                views.setTextViewText(R.id.poPrice, poCu)
-
-                if(widgetId==0)
-                    getInstance(this@UUUpdateService).updateAppWidget(
-                        ComponentName(this@UUUpdateService, CryptoPriceAppWidget::class.java), views
-                    )
-                else {
-                    views.setTextViewText(R.id.textViewId,"$widgetId")
-                    getInstance(this@UUUpdateService).updateAppWidget(
-                        widgetId, views
-                    )
                 }
                 Log.i(_TAG, "onStartJob: end")
-                jobFinished(params,false)
+                jobFinished(params, false)
             }
             Log.i(_TAG, "onStartJob: return false")
 
@@ -249,15 +210,19 @@ class CryptoPriceAppWidget : AppWidgetProvider() {
 
     }
 
+/*
 
     override fun onReceive(context: Context?, intent: Intent?) {
-        Log.d(TAG, "onReceive: intent.extras --> ${intent?.extras}\nvvvvvvvvvvvvvvvvvvvv intent action --> ${intent?.action}")
+        Log.d(
+            TAG,
+            "onReceive: intent.extras --> ${intent?.extras}\nvvvvvvvvvvvvvvvvvvvv intent action --> ${intent?.action}"
+        )
         super.onReceive(context, intent)
 
         Log.i(TAG, "onReceive: ${intent?.data}")
         Log.d(TAG, "onReceive: intent.extras --> ${intent?.extras}")
         val testUri = intent?.data
-        val widgetId = intent?.extras?.getInt(INT_WIDGET_KEY)?:0
+        val widgetId = intent?.extras?.getInt(INT_WIDGET_KEY) ?: 0
         if (intent?.action.equals(ACTION_SIMPLEAPPWIDGET) && context != null) {
             Log.d(TAG, "onReceive: $ACTION_SIMPLEAPPWIDGET\n${intent?.extras}")
 //            val appWidgetManager = getInstance(context)
@@ -271,21 +236,32 @@ class CryptoPriceAppWidget : AppWidgetProvider() {
 //            Log.i(TAG, "onReceive: b.finish()")
 //            b.finish()
 
-            val jobInfo = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-                JobInfo.Builder(0,ComponentName(context.applicationContext,UUUpdateService::class.java))
-                    .setRequiredNetworkType(JobInfo.NETWORK_TYPE_UNMETERED)
-                    .setTransientExtras(bundleOf(INT_WIDGET_KEY to widgetId))
-                    .setExtras(persistableBundleOf(INT_WIDGET_KEY to widgetId))
-            } else {
-                JobInfo.Builder(0,ComponentName(context.applicationContext,UUUpdateService::class.java))
-                    .setRequiredNetworkType(JobInfo.NETWORK_TYPE_UNMETERED)
-                    .setExtras(persistableBundleOf(INT_WIDGET_KEY to widgetId))
-            }
-            //.setOverrideDeadline(20000)
-                //.setMinimumLatency(2000)
+//            val jobInfo = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+//                JobInfo.Builder(0,ComponentName(context.applicationContext,UUUpdateService::class.java))
+//                    .setRequiredNetworkType(JobInfo.NETWORK_TYPE_UNMETERED)
+//                    .setTransientExtras(bundleOf(INT_WIDGET_KEY to widgetId))
+//                    .setExtras(persistableBundleOf(INT_WIDGET_KEY to widgetId))
+//            } else {
+//                JobInfo.Builder(0,ComponentName(context.applicationContext,UUUpdateService::class.java))
+//                    .setRequiredNetworkType(JobInfo.NETWORK_TYPE_UNMETERED)
+//                    .setExtras(persistableBundleOf(INT_WIDGET_KEY to widgetId))
+//            }
 
-            (context.getSystemService(Context.JOB_SCHEDULER_SERVICE) as JobScheduler).schedule(jobInfo.build())
-
+            val jobInfo = JobInfo.Builder(
+                0,
+                ComponentName(context.applicationContext, UUUpdateService::class.java)
+            )
+                .setRequiredNetworkType(JobInfo.NETWORK_TYPE_UNMETERED)
+                .setExtras(
+                    persistableBundleOf(
+                        AppWidgetManager.EXTRA_APPWIDGET_IDS to intArrayOf(
+                            widgetId
+                        )
+                    )
+                )
+            (context.getSystemService(Context.JOB_SCHEDULER_SERVICE) as JobScheduler).schedule(
+                jobInfo.build()
+            )
 
 //            try {
 //                val cn = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O)
@@ -304,24 +280,64 @@ class CryptoPriceAppWidget : AppWidgetProvider() {
 //                e.printStackTrace()
 //            }
         } else {
-            Log.i(TAG, "onReceive: Else ACTION_SIMPLEAPPWIDGET onReceive: intent.action --> ${intent?.action}")
+            Log.i(
+                TAG,
+                "onReceive: Else ACTION_SIMPLEAPPWIDGET onReceive: intent.action --> ${intent?.action}"
+            )
         }
         Log.d(TAG, "onReceive: END")
     }
+*/
 
-
+/*
 
     private lateinit var yoServerTime: String
     private lateinit var yoCu: String
     private lateinit var poCu: String
     lateinit var biCu: String
+*/
+
+    /**
+     * Implements [BroadcastReceiver.onReceive] to dispatch calls to the various
+     * other methods on AppWidgetProvider.
+     *
+     * @param context The Context in which the receiver is running.
+     * @param intent The Intent being received.
+     */
+    override fun onReceive(context: Context?, intent: Intent?) {
+        Log.i(
+            TAG,
+            """Receive: 0000000000000000
+                |extras.id ${intent?.extras?.getInt(AppWidgetManager.EXTRA_APPWIDGET_ID)}
+                |extrs.ids --> ${intent?.extras?.getIntArray(AppWidgetManager.EXTRA_APPWIDGET_IDS)?.toList()}
+                |acction   --> ${intent?.action}
+            """.trimMargin()
+        )
+        super.onReceive(context, intent)
+    }
 
     override fun onUpdate(
         context: Context,
         appWidgetManager: AppWidgetManager,
         appWidgetIds: IntArray
     ) {
-        runBlocking {
+
+        Log.i(TAG, "onUpdate: 111111111111 appWidgetIds= ${appWidgetIds.toList()}")
+        val jobInfo = JobInfo.Builder(
+            0,
+            ComponentName(context.applicationContext, UUUpdateService::class.java)
+        )
+            .setRequiredNetworkType(JobInfo.NETWORK_TYPE_UNMETERED)
+            .setExtras(
+                persistableBundleOf(
+                    AppWidgetManager.EXTRA_APPWIDGET_IDS to appWidgetIds
+                )
+            )
+        (context.getSystemService(Context.JOB_SCHEDULER_SERVICE) as JobScheduler).schedule(
+            jobInfo.build()
+        )
+
+        /*runBlocking {
 
             val client = OkHttpClient.Builder()
                 .connectTimeout(5, TimeUnit.SECONDS)
@@ -376,13 +392,16 @@ class CryptoPriceAppWidget : AppWidgetProvider() {
         for (appWidgetId in appWidgetIds) {
             //updateAppWidget(context, appWidgetManager, appWidgetId)
             updAppWid(context, appWidgetManager, appWidgetId)
-        }
+        }*/
     }
 
     override fun onDeleted(context: Context, appWidgetIds: IntArray) {
         // When the user deletes the widget, delete the preference associated with it.
         for (appWidgetId in appWidgetIds) {
             deleteTitlePref(context, appWidgetId)
+
+            Log.i(TAG, "onDeleted:  (context.getSystemService(Context.JOB_SCHEDULER_SERVICE) as JobScheduler).cancel(appWidgetId) $appWidgetId")
+            (context.getSystemService(Context.JOB_SCHEDULER_SERVICE) as JobScheduler).cancel(appWidgetId)
         }
     }
 
@@ -392,6 +411,8 @@ class CryptoPriceAppWidget : AppWidgetProvider() {
 
     override fun onDisabled(context: Context) {
         // Enter relevant functionality for when the last widget is disabled
+        Log.i(TAG, "onDisabled: cancelAll()")
+        (context.getSystemService(Context.JOB_SCHEDULER_SERVICE) as JobScheduler).cancelAll()
     }
 
 
@@ -402,15 +423,18 @@ class CryptoPriceAppWidget : AppWidgetProvider() {
         newOptions: Bundle?
     ) {
         super.onAppWidgetOptionsChanged(context, appWidgetManager, appWidgetId, newOptions)
-        Log.d(TAG, "o: newOptions MIN_WIDTH  ${newOptions?.get(OPTION_APPWIDGET_MIN_WIDTH)}")
+        Log.d(
+            TAG,
+            "o: newOptions MIN_WIDTH  ${newOptions?.get(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH)}"
+        )
     }
 
-    private fun updAppWid(
+/*    private fun updAppWid(
         context: Context,
         appWidgetManager: AppWidgetManager,
         xappWidgetId: Int
     ) {
-        var appWidgetId=xappWidgetId
+        var appWidgetId = xappWidgetId
         val widgetText = loadTitlePref(context, appWidgetId)
         val widgetUpdateTime = loadUPdateIntervalPref(context, appWidgetId)
         // Construct the RemoteViews object
@@ -427,9 +451,16 @@ class CryptoPriceAppWidget : AppWidgetProvider() {
 //        views.setOnClickPendingIntent(R.id.app_widget, pendingIntent)
         val pi: PendingIntent = Intent(context, CryptoPriceAppWidget::class.java)
             .let { intent: Intent ->
-                intent.putExtra(INT_WIDGET_KEY,appWidgetId)
-                intent.action = ACTION_SIMPLEAPPWIDGET
-                PendingIntent.getBroadcast(context, appWidgetId, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+                //intent.putExtra(INT_WIDGET_KEY,appWidgetId)
+                intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, intArrayOf(appWidgetId))
+                //intent.action = ACTION_SIMPLEAPPWIDGET
+                intent.action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
+                PendingIntent.getBroadcast(
+                    context,
+                    appWidgetId,
+                    intent,
+                    PendingIntent.FLAG_UPDATE_CURRENT
+                )
             }
         views.setOnClickPendingIntent(R.id.refresh_bt, pi)
         Log.i(
@@ -437,7 +468,7 @@ class CryptoPriceAppWidget : AppWidgetProvider() {
             "updAppWid: !!!!!!!!!!!!!!!!!! $appWidgetId !!!!!!!!!!!!!!!!!! views.setOnClickPendingIntent(R.id.refresh_bt, pi) !!!!!!!"
         )
         appWidgetManager.updateAppWidget(appWidgetId, views)
-    }
+    }*/
 }
 
 
@@ -453,7 +484,24 @@ internal fun updateAppWidget(
     val widgetUpdateTime = loadTitlePref(context, appWidgetId)
     // Construct the RemoteViews object
     val views = RemoteViews(context.packageName, R.layout.crypto_price_app_widget)
-    views.setTextViewText(R.id.appwidget_text, widgetText)
+    views.setTextViewText(R.id.textWidTitle, widgetText)
+    views.setTextViewText(R.id.textWidTitleId,appWidgetId.toString())
+    appWidgetManager.updateAppWidget(appWidgetId,views)
+
+    val jobInfo = JobInfo.Builder(
+        0,
+        ComponentName(context.applicationContext, CryptoPriceAppWidget.UUUpdateService::class.java)
+    )
+        .setRequiredNetworkType(JobInfo.NETWORK_TYPE_UNMETERED)
+        .setExtras(
+            persistableBundleOf(
+                AppWidgetManager.EXTRA_APPWIDGET_IDS to intArrayOf(appWidgetId)
+            )
+        )
+    (context.getSystemService(Context.JOB_SCHEDULER_SERVICE) as JobScheduler).schedule(
+        jobInfo.build()
+    )
+/*
 
     //-------------
     GlobalScope.launch(Dispatchers.IO) {
@@ -520,22 +568,29 @@ internal fun updateAppWidget(
 //        views.setOnClickPendingIntent(R.id.refresh_bt, pi)
         val pi: PendingIntent = Intent(context, CryptoPriceAppWidget::class.java)
             .let { _intent: Intent ->
-                _intent.putExtra(INT_WIDGET_KEY,appWidgetId)
-                _intent.action = ACTION_SIMPLEAPPWIDGET
-                PendingIntent.getBroadcast(context,appWidgetId,_intent,PendingIntent.FLAG_UPDATE_CURRENT)
+                //_intent.putExtra(INT_WIDGET_KEY,appWidgetId)
+                //_intent.action = ACTION_SIMPLEAPPWIDGET
+                _intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, intArrayOf(appWidgetId))
+                _intent.action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
+                PendingIntent.getBroadcast(
+                    context,
+                    appWidgetId,
+                    _intent,
+                    PendingIntent.FLAG_UPDATE_CURRENT
+                )
             }
-
         views.setOnClickPendingIntent(R.id.refresh_bt, pi)
         Log.i(
             TAG,
             "updateAppWidget: !!!!!!!!!!!!!!!!!!!!!!!!!!!!$appWidgetId!!!!!!!!!!!!!!!!!! views.setOnClickPendingIntent(R.id.refresh_bt, pi) !!!!!!!!!!!!!!!!!!!!!!!!!"
         )
-        views.setTextViewText(R.id.textWidTitle,widgetText)
-        views.setTextViewText(R.id.textWidTitleId,"$appWidgetId")
+        views.setTextViewText(R.id.textWidTitle, widgetText)
+        views.setTextViewText(R.id.textWidTitleId, "$appWidgetId")
 
         appWidgetManager.updateAppWidget(appWidgetId, views)
     }
     //-------------
+*/
 
     // Instruct the widget manager to update the widget
 

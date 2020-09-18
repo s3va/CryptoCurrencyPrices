@@ -17,11 +17,13 @@ import androidx.core.os.persistableBundleOf
 import kotlinx.android.synthetic.main.crypto_price_app_widget_configure.*
 
 private const val TAG = "WidgetConfigureActivity"
+
 /**
  * The configuration screen for the [CryptoPriceAppWidget] AppWidget.
  */
 class CryptoPriceAppWidgetConfigureActivity : AppCompatActivity() {
     private var appWidgetId = AppWidgetManager.INVALID_APPWIDGET_ID
+
     //private lateinit var appWidgetText: EditText
     private var onClickListener = View.OnClickListener {
         //val context = this@NewAppWidgetConfigureActivity
@@ -29,38 +31,31 @@ class CryptoPriceAppWidgetConfigureActivity : AppCompatActivity() {
 
         // When the button is clicked, store the string locally
         val widgetText = appwidget_ctext.text.toString()
-        val twidgetText = textLayoytInterval.text.toString().toLongOrNull()?:0
+        val twidgetText = textLayoytInterval.text.toString().toLongOrNull() ?: 0
         saveTitlePref(context, appWidgetId, widgetText, twidgetText)
 
         // It is the responsibility of the configuration activity to update the app widget
         val appWidgetManager = AppWidgetManager.getInstance(context)
         updateAppWidget(context, appWidgetManager, appWidgetId)
 
-        Log.i(TAG, "OnClickListener: ************************ .setPeriodic($twidgetText * 1000)")
-                    val jobInfo = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-                JobInfo.Builder(appWidgetId,ComponentName(context.applicationContext,
-                    CryptoPriceAppWidget.UUUpdateService::class.java)
-                )
-                    .setRequiredNetworkType(JobInfo.NETWORK_TYPE_UNMETERED)
-                    .setPeriodic(twidgetText * 1000)
-                    .setTransientExtras(bundleOf(INT_WIDGET_KEY to appWidgetId))
-                    .setExtras(persistableBundleOf(INT_WIDGET_KEY to appWidgetId))
-            } else {
-                JobInfo.Builder(0, ComponentName(context.applicationContext,
-                    CryptoPriceAppWidget.UUUpdateService::class.java)
-                )
-                    .setRequiredNetworkType(JobInfo.NETWORK_TYPE_UNMETERED)
-                    .setPeriodic(twidgetText * 1000)
-                    .setExtras(persistableBundleOf(INT_WIDGET_KEY to appWidgetId))
-            }
-            //.setOverrideDeadline(20000)
-                //.setMinimumLatency(2000)
+        Log.i(TAG, "OnClickListener: ************************ .setPeriodic($twidgetText * 1000) obInfo.Builder( jobId=$appWidgetId")
+        val jobInfo = JobInfo.Builder(
+            appWidgetId,
+            ComponentName(
+                context.applicationContext,
+                CryptoPriceAppWidget.UUUpdateService::class.java
+            )
+        )
+            .setRequiredNetworkType(JobInfo.NETWORK_TYPE_UNMETERED)
+            .setPeriodic(twidgetText * 1000)
+            .setExtras(persistableBundleOf(AppWidgetManager.EXTRA_APPWIDGET_IDS to intArrayOf(appWidgetId)))
 
-            (context.getSystemService(Context.JOB_SCHEDULER_SERVICE) as JobScheduler).schedule(jobInfo.build())
+        (context.getSystemService(Context.JOB_SCHEDULER_SERVICE) as JobScheduler).schedule(jobInfo.build())
 
         // Make sure we pass back the original appWidgetId
         val resultValue = Intent()
         resultValue.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
+        //resultValue.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, intArrayOf(appWidgetId))
         setResult(RESULT_OK, resultValue)
         finish()
     }
@@ -98,11 +93,13 @@ class CryptoPriceAppWidgetConfigureActivity : AppCompatActivity() {
             )
         )
 
-        textLayoytInterval.setText(loadUPdateIntervalPref(
-            this@CryptoPriceAppWidgetConfigureActivity,
-            appWidgetId).toString()
+        textLayoytInterval.setText(
+            loadUPdateIntervalPref(
+                this@CryptoPriceAppWidgetConfigureActivity,
+                appWidgetId
+            ).toString()
         )
-        
+
     }
 
 }
@@ -130,7 +127,7 @@ internal fun loadTitlePref(context: Context, appWidgetId: Int): String {
 
 internal fun loadUPdateIntervalPref(context: Context, appWidgetId: Int): Long {
     val prefs = context.getSharedPreferences(PREFS_NAME, 0)
-    val timeValue = prefs.getLong(PREF_PREFIX_TKEY + appWidgetId, 0)
+    val timeValue = prefs.getLong(PREF_PREFIX_TKEY + appWidgetId, 900)
     Log.d("WIDPREFLOad", "loadUPdateIntervalPref: $timeValue")
     //return titleValue ?: context.getString(R.string.appwidget_text)
     return timeValue
